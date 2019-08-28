@@ -4,7 +4,7 @@
 #define TOKEN  "Your_token_here"  // Put here your Ubidots TOKEN
 #define WIFISSID "Your_WiFi_SSID" // Put here your Wi-Fi SSID
 #define PASSWORD "Your_WiFi_Password" // Put here your Wi-Fi password
-
+ 
 Ubidots client(TOKEN);
 
 //*************************************************
@@ -13,7 +13,7 @@ Ubidots client(TOKEN);
 int Trig = D0;    // Trigger pin - NodeMCU
 int Echo = D1;    // Echo pin - NodeMCU
 int infrared = A0;
-float ultrasonic_cm, infrared_cm;
+float ultrasonic_cm, infrared_cm, infrared_cm_cal;
 float max_value, min_value;
 //---------------------------------------
 
@@ -46,13 +46,12 @@ void loop()
   infrared_cm = read_infrared(); // Infrared sensor measurement
   ultrasonic_cm = read_ultrasonic(); // Ultrasonic sensor measurement
 
-  /*
-  if(infrared_cm < min_value || infrared_cm > max_value)
+  if(infrared_cm > min_value && infrared_cm < max_value)
   {
-    infrared_cm = 0;
+    infrared_cm_cal = 0;
   }
-  */
-  
+
+  /*
   Serial.print("Ultrasonic sensor distance: ");
   Serial.print(ultrasonic_cm);
   Serial.println(" cm");
@@ -61,8 +60,8 @@ void loop()
   Serial.print(infrared_cm);
   Serial.println(" cm");
   Serial.println(" ");
-  
-  // send_ubidots(); // Build and send Ubidots payload
+  */
+  send_ubidots(); // Build and send Ubidots payload
   
   delay(2000);
 }
@@ -90,11 +89,12 @@ void calibration_infra (void)
     }
     delay(del);
   }
-
+  /*
   Serial.print("Min value = ");
   Serial.println(min_value);
   Serial.print("Max value = ");
   Serial.println(max_value);
+  */
 }
 //---------------------------------------
 float read_infrared ()
@@ -136,5 +136,6 @@ void send_ubidots()
   client.setDataSourceLabel("parking_test_1_s3_s4"); // Change device label
   client.add("ultrasonic_cm", ultrasonic_cm);
   client.add("infrared_cm", infrared_cm);
+  client.add("infrared_cm_cal", infrared_cm_cal);
   client.sendAll(true);
 }
